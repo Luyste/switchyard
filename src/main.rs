@@ -1,5 +1,5 @@
 mod domain;
-use domain::{Agent, AgentState, label, parse_state};
+use domain::{Agent, AgentState};
 
 fn main() {
     let agent = Agent {
@@ -16,9 +16,9 @@ fn main() {
         state: AgentState::Unknown,
     };
 
-    let parsed = parse_state("banana");
+    let parsed = AgentState::parse("banana");
     match parsed {
-        Some(state) => println!("parsed: {}", label(&state)),
+        Some(state) => println!("parsed: {}", state.label()),
         None => println!("None"),
     }
 
@@ -27,14 +27,14 @@ fn main() {
         agent.name,
         agent.kind,
         agent.cwd,
-        label(&agent.state)
+        agent.state.label()
     );
     println!(
         "{} {} {} {}",
         agent2.name,
         agent2.kind,
         agent2.cwd,
-        label(&agent2.state)
+        agent2.state.label()
     );
 
     println!("{:?}", agent.state);

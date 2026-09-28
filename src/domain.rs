@@ -13,21 +13,22 @@ pub struct Agent {
     pub state: AgentState,
 }
 
-pub fn parse_state(s: &str) -> Option<AgentState> {
-    match s {
-        "working" => Some(AgentState::Working),
-        "waiting" => Some(AgentState::Waiting),
-        "idle" => Some(AgentState::Idle),
-        _ => None,
+impl AgentState {
+    pub fn parse(s: &str) -> Option<AgentState> {
+        match s {
+            "working" => Some(AgentState::Working),
+            "waiting" => Some(AgentState::Waiting),
+            "idle" => Some(AgentState::Idle),
+            _ => None,
+        }
     }
-}
-
-pub fn label(state: &AgentState) -> &'static str {
-    match state {
-        AgentState::Working => "working",
-        AgentState::Waiting => "waiting",
-        AgentState::Idle => "idle",
-        AgentState::Unknown => "unknown",
+    pub fn label(&self) -> &'static str {
+        match self {
+            AgentState::Working => "working",
+            AgentState::Waiting => "waiting",
+            AgentState::Idle => "idle",
+            AgentState::Unknown => "unknown",
+        }
     }
 }
 
@@ -37,24 +38,24 @@ mod tests {
 
     #[test]
     fn parses_known_states() {
-        assert_eq!(parse_state("working"), Some(AgentState::Working));
-        assert_eq!(parse_state("waiting"), Some(AgentState::Waiting));
-        assert_eq!(parse_state("idle"), Some(AgentState::Idle));
+        assert_eq!(AgentState::parse("working"), Some(AgentState::Working));
+        assert_eq!(AgentState::parse("waiting"), Some(AgentState::Waiting));
+        assert_eq!(AgentState::parse("idle"), Some(AgentState::Idle));
     }
 
     #[test]
     fn rejects_garbage() {
-        assert_eq!(parse_state("banana"), None);
-        assert_eq!(parse_state("Idle"), None);
+        assert_eq!(AgentState::parse("banana"), None);
+        assert_eq!(AgentState::parse("Idle"), None);
     }
 
     #[test]
     fn label_roundtrips() {
         for state in [AgentState::Working, AgentState::Waiting, AgentState::Idle] {
-            assert_eq!(parse_state(label(&state)), Some(state));
+            assert_eq!(AgentState::parse(state.label()), Some(state));
         }
 
         let state = AgentState::Unknown;
-        assert_eq!(parse_state(label(&state)), None);
+        assert_eq!(AgentState::parse(state.label()), None);
     }
 }
