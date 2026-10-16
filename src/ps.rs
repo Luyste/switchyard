@@ -47,7 +47,34 @@ pub fn parse_ps(output: &str) -> Vec<Process> {
 }
 
 pub fn is_pi(command: &str) -> bool {
-    Path::new(command).file_name() == Some(OsStr::new("pi"))
+    let mut words = command.split_whitespace();
+
+    let first = match words.next() {
+        Some(first) => first,
+        None => return false,
+    };
+
+    // the program itself: "pi" or "/usr/local/bin/pi"
+    if file_name_is(first, "pi") {
+        return true;
+    }
+
+    // an interpreter running the script: "node /opt/homebrew/bin/pi"
+    if file_name_is(first, "node") {
+        let second = match words.next() {
+            Some(second) => second,
+            None => return false,
+        };
+
+        return file_name_is(second, "pi");
+    }
+
+    false
+}
+
+fn file_name_is(word: &str, want: &str) -> bool {
+    // compare only the last path part, so "/opt/homebrew/bin/pi" counts as "pi"
+    Path::new(word).file_name() == Some(OsStr::new(want))
 }
 
 pub fn find_agent(pid: u32, processes: &[Process]) -> Option<&Process> {
@@ -107,7 +134,7 @@ mod tests {
         let ps = parse_ps(PS_FIXTURES);
         assert_eq!(find_agent(17305, &ps).map(|p| p.pid), Some(17344));
         assert_eq!(find_agent(1902, &ps).map(|p| p.pid), Some(1941));
-        assert_eq!(find_agent(71834, &ps).map(|p| p.pid), None);
+        assert_eq!(find_agent(71843, &ps).map(|p| p.pid), None);
         assert_eq!(find_agent(94991, &ps).map(|p| p.pid), None);
     }
 
@@ -121,5 +148,10 @@ mod tests {
 
         let input = "/bin/zsh -l -i -c pi ; exec zsh";
         assert!(!is_pi(input));
+
+        assert!(!is_pi("vim /tmp/pi"));
+
+        assert!(is_pi("pi"));
+        assert!(is_pi("/usr/local/bin/pi"));
     }
 }
