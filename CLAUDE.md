@@ -33,6 +33,10 @@ appears.
   borrowing; we optimize later, if ever.
 - When I do ask you to write code, keep it small, commented where it teaches
   something, and explain it afterwards.
+- **Question before building.** Before each new feature or concept, ask me a
+  few short questions so I realise *why* we need it (use `IDEA.md` as the
+  source of the "because"). Always offer to skip ("skip" = go straight to
+  building). Keep these exchanges short: two or three questions, not a lecture.
 
 ## The yard (the center of sy)
 

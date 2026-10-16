@@ -1,0 +1,22 @@
+    1     0 /sbin/launchd
+  334     1 /usr/libexec/logd
+  335     1 /usr/libexec/centaurid
+17304     1 tmux new-session -d -P -F #{pane_id} -s pi-agent-tether -c /Users/jopluysterburg/personal/projects/agent-tether /bin/zsh -l -i -c cd '/Users/jopluysterburg/personal/projects/agent-tether' && 'pi'; exec /bin/zsh
+95865 95771 /opt/homebrew/bin/tmux attach-session -t =claude-switchyard
+94819 17304 /bin/zsh
+17305 17304 /bin/zsh -l -i -c cd '/Users/jopluysterburg/personal/projects/agent-tether' && 'pi'; exec /bin/zsh
+17344 17305 node /opt/homebrew/bin/pi
+17345 17344 pi 
+71843 17304 zsh
+96337  1306 /usr/bin/login -flp jopluysterburg /bin/bash --noprofile --norc -c exec -l /bin/zsh
+96338 96337 -/bin/zsh
+96444 96338 claude
+84103 95013 caffeinate -i -t 300
+94991 17304 /bin/zsh -l -i -c claude ; exec /bin/zsh
+95013 94991 claude
+79221 17304 /bin/zsh -l -i -c pi ; exec /bin/zsh
+79245 79221 node /opt/homebrew/bin/pi
+79246 79245 pi 
+ 1902 17304 /bin/zsh -l -i -c cd '/Users/jopluysterburg/personal/projects/switchyard.testing-agent-2' && 'pi'; exec /bin/zsh
+ 1941  1902 node /opt/homebrew/bin/pi
+ 1942  1941 pi 

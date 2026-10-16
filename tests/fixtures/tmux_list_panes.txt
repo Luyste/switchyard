@@ -1,2 +1,6 @@
-claude-switchyard	0	0	%2	53925	2.1.283	/Users/jopluysterburg/personal/projects/switchyard
-pi-shoebox	0	0	%0	18680	volta-shim	/Users/jopluysterburg/personal/projects/shoebox
+claude-switchyard	0	0	%9	94991	2.1.301	/Users/jopluysterburg/personal/projects/switchyard
+pi-agent-tether	0	0	%0	17305	volta-shim	/Users/jopluysterburg/personal/projects/agent-tether
+pi-nvim	0	0	%4	79221	volta-shim	/Users/jopluysterburg/.config/nvim
+pi-switchyard	0	0	%8	94819	zsh	/Users/jopluysterburg/personal/projects/switchyard
+pi-testing-agent-2	0	0	%10	1902	volta-shim	/Users/jopluysterburg/personal/projects/switchyard.testing-agent-2
+sy-inner	0	0	%1	71843	zsh	/Users/jopluysterburg/personal/projects/switchyard.nvim
