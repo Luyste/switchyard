@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 #[derive(Debug, PartialEq)]
 pub enum AgentState {
     Working,
@@ -14,8 +16,8 @@ pub enum AgentKind {
 
 pub struct Agent {
     pub name: String,
-    pub kind: String,
-    pub cwd: String,
+    pub kind: AgentKind,
+    pub cwd: PathBuf,
     pub state: AgentState,
 }
 
