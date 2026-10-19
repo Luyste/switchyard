@@ -12,10 +12,11 @@ fn main() -> anyhow::Result<()> {
     let processes = list_processes()?;
 
     for pane in &panes {
-        if find_agent(pane.pane_pid, &processes).is_some() {
+        if let Some((_, kind)) = find_agent(pane.pane_pid, &processes) {
             println!(
-                "{} pi {}",
+                "{} {} {}",
                 pane.session_name,
+                kind.label(),
                 pane.pane_current_path.display()
             )
         };

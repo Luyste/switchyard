@@ -1,6 +1,8 @@
 use anyhow::{Context, bail};
 use std::{ffi::OsStr, path::Path, process::Command};
 
+use crate::domain::AgentKind;
+
 #[derive(Debug, PartialEq)]
 pub struct Process {
     pub pid: u32,
@@ -62,7 +64,8 @@ pub fn parse_ps(output: &str) -> Vec<Process> {
     processes
 }
 
-pub fn is_pi(command: &str) -> bool {
+// checks wheter or not the process runs an agent instance (pi/ claude)
+pub fn runs(command: &str, name: &str) -> bool {
     let mut words = command.split_whitespace();
 
     let first = match words.next() {
@@ -71,7 +74,7 @@ pub fn is_pi(command: &str) -> bool {
     };
 
     // the program itself: "pi" or "/usr/local/bin/pi"
-    if file_name_is(first, "pi") {
+    if file_name_is(first, name) {
         return true;
     }
 
@@ -82,21 +85,35 @@ pub fn is_pi(command: &str) -> bool {
             None => return false,
         };
 
-        return file_name_is(second, "pi");
+        return file_name_is(second, name);
     }
 
     false
 }
 
+// checks wether or not the file name is what we want
 fn file_name_is(word: &str, want: &str) -> bool {
     // compare only the last path part, so "/opt/homebrew/bin/pi" counts as "pi"
     Path::new(word).file_name() == Some(OsStr::new(want))
 }
 
-pub fn find_agent(pid: u32, processes: &[Process]) -> Option<&Process> {
+fn agent_kind(command: &str) -> Option<AgentKind> {
+    if runs(command, "pi") {
+        return Some(AgentKind::Pi);
+    }
+
+    if runs(command, "claude") {
+        return Some(AgentKind::Claude);
+    }
+
+    None
+}
+
+// finds the corresponding process and agent name from the process list based on pid
+pub fn find_agent(pid: u32, processes: &[Process]) -> Option<(&Process, AgentKind)> {
     for child in processes.iter().filter(|p| p.ppid == pid) {
-        if is_pi(&child.command) {
-            return Some(child);
+        if let Some(kind) = agent_kind(&child.command) {
+            return Some((child, kind));
         }
 
         if let Some(found) = find_agent(child.pid, processes) {
@@ -148,26 +165,35 @@ mod tests {
     #[test]
     fn finds_agent() {
         let ps = parse_ps(PS_FIXTURES);
-        assert_eq!(find_agent(17305, &ps).map(|p| p.pid), Some(17344));
-        assert_eq!(find_agent(1902, &ps).map(|p| p.pid), Some(1941));
-        assert_eq!(find_agent(71843, &ps).map(|p| p.pid), None);
-        assert_eq!(find_agent(94991, &ps).map(|p| p.pid), None);
+        assert_eq!(
+            find_agent(17305, &ps).map(|p| (p.0.pid, p.1)),
+            Some((17344, AgentKind::Pi))
+        );
+        assert_eq!(
+            find_agent(1902, &ps).map(|p| (p.0.pid, p.1)),
+            Some((1941, AgentKind::Pi))
+        );
+        assert_eq!(find_agent(71843, &ps).map(|p| (p.0.pid, p.1)), None);
+        assert_eq!(
+            find_agent(94991, &ps).map(|p| (p.0.pid, p.1)),
+            Some((95013, AgentKind::Claude))
+        );
     }
 
     #[test]
-    fn is_pi_works() {
+    fn runs_works() {
         let input = "node /opt/homebrew/bin/pi";
-        assert!(is_pi(input));
+        assert!(runs(input, "pi"));
 
         let input = "zsh";
-        assert!(!is_pi(input));
+        assert!(!runs(input, "pi"));
 
         let input = "/bin/zsh -l -i -c pi ; exec zsh";
-        assert!(!is_pi(input));
+        assert!(!runs(input, "pi"));
 
-        assert!(!is_pi("vim /tmp/pi"));
+        assert!(!runs("vim /tmp/pi", "pi"));
 
-        assert!(is_pi("pi"));
-        assert!(is_pi("/usr/local/bin/pi"));
+        assert!(runs("pi", "pi"));
+        assert!(runs("/usr/local/bin/pi", "pi"));
     }
 }

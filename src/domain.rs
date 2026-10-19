@@ -6,11 +6,26 @@ pub enum AgentState {
     Unknown,
 }
 
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum AgentKind {
+    Claude,
+    Pi,
+}
+
 pub struct Agent {
     pub name: String,
     pub kind: String,
     pub cwd: String,
     pub state: AgentState,
+}
+
+impl AgentKind {
+    pub fn label(&self) -> &'static str {
+        match self {
+            AgentKind::Claude => "claude",
+            AgentKind::Pi => "pi",
+        }
+    }
 }
 
 impl AgentState {
