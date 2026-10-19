@@ -1,10 +1,26 @@
-use std::{ffi::OsStr, path::Path};
+use anyhow::{Context, bail};
+use std::{ffi::OsStr, path::Path, process::Command};
 
 #[derive(Debug, PartialEq)]
 pub struct Process {
     pub pid: u32,
     pub ppid: u32,
     pub command: String,
+}
+
+pub fn list_processes() -> anyhow::Result<Vec<Process>> {
+    let output = Command::new("ps")
+        .args(["-A", "-o", "pid=,ppid=,command="])
+        .output()
+        .context("failed to run ps")?;
+
+    if !output.status.success() {
+        bail!("ps failed: {}", String::from_utf8_lossy(&output.stderr));
+    }
+
+    let text = String::from_utf8(output.stdout).context("ps output is not UTF-8")?;
+
+    Ok(parse_ps(&text))
 }
 
 pub fn parse_ps(output: &str) -> Vec<Process> {

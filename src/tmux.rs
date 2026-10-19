@@ -1,4 +1,5 @@
-use std::path::PathBuf;
+use anyhow::{Context, bail};
+use std::{path::PathBuf, process::Command};
 
 #[derive(Debug, PartialEq)]
 pub struct Pane {
@@ -9,6 +10,33 @@ pub struct Pane {
     pub pane_pid: u32,
     pub pane_current_command: String,
     pub pane_current_path: PathBuf,
+}
+
+pub const PANE_FORMAT: &str = "#{session_name}\t#{window_index}\t#{pane_index}\t#{pane_id}\t#{pane_pid}\t#{pane_current_command}\t#{pane_current_path}";
+
+pub fn list_panes() -> anyhow::Result<Vec<Pane>> {
+    let output = Command::new("tmux")
+        .args(["list-panes", "-a", "-F", PANE_FORMAT])
+        .output()
+        .context("failed to run tmux")?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        if is_no_server(&stderr) {
+            return Ok(Vec::new());
+        }
+        bail!("tmux failed: {stderr}");
+    }
+
+    let text = String::from_utf8(output.stdout).context("tmux output is not UTF-8")?;
+
+    let panes = parse_panes(&text);
+
+    Ok(panes)
+}
+
+fn is_no_server(stderr: &str) -> bool {
+    stderr.starts_with("no server running") || stderr.starts_with("error connecting to")
 }
 
 pub fn parse_panes(output: &str) -> Vec<Pane> {
